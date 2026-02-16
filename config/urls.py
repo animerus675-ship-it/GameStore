@@ -22,6 +22,7 @@ from django.views.defaults import page_not_found, server_error
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("pages.urls")),
+    path("api/", include("api_app.urls")),
 ]
 
 handler404 = lambda request, exception: page_not_found(  # noqa: E731
