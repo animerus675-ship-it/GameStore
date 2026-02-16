@@ -35,14 +35,20 @@ class Game(models.Model):
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    discount_percent = models.PositiveSmallIntegerField(
+    discount_percent = models.IntegerField(
         default=0,
         validators=[MinValueValidator(0), MaxValueValidator(90)],
     )
     release_year = models.IntegerField(validators=[validate_release_year])
     is_active = models.BooleanField(default=True)
 
-    publisher = models.ForeignKey(Publisher, on_delete=models.PROTECT, related_name="games")
+    publisher = models.ForeignKey(
+        Publisher,
+        on_delete=models.SET_NULL,
+        related_name="games",
+        null=True,
+        blank=True,
+    )
     genres = models.ManyToManyField(Genre, related_name="games", blank=True)
     platforms = models.ManyToManyField(Platform, related_name="games", blank=True)
     tags = models.ManyToManyField(Tag, related_name="games", blank=True)

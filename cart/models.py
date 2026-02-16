@@ -20,7 +20,9 @@ class CartItem(models.Model):
     price_snapshot = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
-        unique_together = ("cart", "game")
+        constraints = [
+            models.UniqueConstraint(fields=["cart", "game"], name="cart_item_cart_game_unique"),
+        ]
 
     def __str__(self):
         return f"{self.game} x {self.quantity}"

@@ -98,9 +98,12 @@ class Command(BaseCommand):
         return games
 
     def _seed_reviews(self, users, games):
+        target_count = 20
         pairs = [(user, game) for user in users for game in games]
         random.shuffle(pairs)
-        for user, game in pairs[:20]:
+        for user, game in pairs:
+            if Review.objects.count() >= target_count:
+                break
             Review.objects.get_or_create(
                 user=user,
                 game=game,
@@ -111,7 +114,10 @@ class Command(BaseCommand):
             )
 
     def _seed_favorites(self, users, games):
+        target_count = 10
         pairs = [(user, game) for user in users for game in games]
         random.shuffle(pairs)
-        for user, game in pairs[:10]:
+        for user, game in pairs:
+            if Favorite.objects.count() >= target_count:
+                break
             Favorite.objects.get_or_create(user=user, game=game)
