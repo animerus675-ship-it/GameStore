@@ -43,6 +43,9 @@
               <li><a href="{% url 'cart_detail' %}" class="{% if request.resolver_match.url_name == 'cart_detail' %}active{% endif %}">Корзина</a></li>
               {% if user.is_authenticated %}
                 <li><a href="{% url 'orders_list' %}" class="{% if request.resolver_match.url_name == 'orders_list' %}active{% endif %}">Мои заказы</a></li>
+                {% if user.is_superuser or perms.orders.change_order %}
+                  <li><a href="{% url 'manage_orders' %}" class="{% if request.resolver_match.url_name == 'manage_orders' %}active{% endif %}">Управление заказами</a></li>
+                {% endif %}
                 <li><a href="#">Привет, {{ user.username }}</a></li>
                 <li><a href="{% url 'logout' %}">Выход</a></li>
               {% else %}

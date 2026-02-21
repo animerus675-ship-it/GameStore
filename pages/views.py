@@ -4,10 +4,14 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.models import Group
+from django.core.paginator import Paginator
 from django.db.models import Avg
+from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from accounts.utils import is_manager
 from cart.models import Cart, CartItem
 from catalog.models import Game
 from catalog.views import shop as catalog_shop
@@ -25,6 +29,8 @@ def register(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            client_group, _ = Group.objects.get_or_create(name="client")
+            user.groups.add(client_group)
             login(request, user)
             messages.success(request, "Регистрация прошла успешно.")
             return redirect("home")
@@ -256,6 +262,56 @@ def order_detail(request, order_id):
             "items": items,
         },
     )
+
+
+@login_required
+def manage_orders(request):
+    if not is_manager(request.user):
+        return HttpResponseForbidden("Forbidden")
+
+    status = request.GET.get("status", "").strip()
+    orders_qs = Order.objects.select_related("user").order_by("-created_at")
+    valid_statuses = {choice for choice, _ in Order.Status.choices}
+    if status in valid_statuses:
+        orders_qs = orders_qs.filter(status=status)
+
+    paginator = Paginator(orders_qs, 20)
+    orders = paginator.get_page(request.GET.get("page"))
+
+    query_params = request.GET.copy()
+    if "page" in query_params:
+        query_params.pop("page")
+    query_string = query_params.urlencode()
+
+    return render(
+        request,
+        "pages/manage_orders.html",
+        {
+            "orders": orders,
+            "statuses": Order.Status.choices,
+            "current_status": status,
+            "query_string": query_string,
+        },
+    )
+
+
+@login_required
+@require_POST
+def manage_order_status(request, order_id):
+    if not is_manager(request.user):
+        return HttpResponseForbidden("Forbidden")
+
+    order = get_object_or_404(Order, id=order_id)
+    new_status = request.POST.get("status", "").strip()
+    valid_statuses = {choice for choice, _ in Order.Status.choices}
+    if new_status in valid_statuses:
+        order.status = new_status
+        order.save(update_fields=["status"])
+        messages.success(request, "Статус заказа обновлен.")
+    else:
+        messages.error(request, "Некорректный статус.")
+
+    return redirect("manage_orders")
 
 
 def contact(request):
