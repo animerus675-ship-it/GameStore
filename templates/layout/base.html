@@ -40,7 +40,9 @@
               <li><a href="{% url 'shop' %}" class="{% if request.resolver_match.url_name == 'shop' %}active{% endif %}">Our Shop</a></li>
               <li><a href="{% url 'product_detail' %}" class="{% if request.resolver_match.url_name == 'product_detail' %}active{% endif %}">Product Details</a></li>
               <li><a href="{% url 'contact' %}" class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact Us</a></li>
+              <li><a href="{% url 'cart_detail' %}" class="{% if request.resolver_match.url_name == 'cart_detail' %}active{% endif %}">Корзина</a></li>
               {% if user.is_authenticated %}
+                <li><a href="{% url 'orders_list' %}" class="{% if request.resolver_match.url_name == 'orders_list' %}active{% endif %}">Мои заказы</a></li>
                 <li><a href="#">Привет, {{ user.username }}</a></li>
                 <li><a href="{% url 'logout' %}">Выход</a></li>
               {% else %}

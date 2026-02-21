@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
@@ -6,9 +8,11 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from cart.models import Cart, CartItem
 from catalog.models import Game
 from catalog.views import shop as catalog_shop
 from favorites.models import Favorite
+from orders.models import Order, OrderItem, Payment
 from reviews.models import Review
 
 
@@ -124,6 +128,134 @@ def upsert_review(request, slug):
         review.save(update_fields=["rating", "text"])
 
     return redirect("product_detail", slug=game.slug)
+
+
+@login_required
+def cart_detail(request):
+    cart, _ = Cart.objects.get_or_create(user=request.user)
+    items = list(CartItem.objects.filter(cart=cart).select_related("game"))
+    total_price = Decimal("0")
+    for item in items:
+        item.subtotal = item.price_snapshot * item.quantity
+        total_price += item.subtotal
+    return render(
+        request,
+        "pages/cart.html",
+        {
+            "cart": cart,
+            "items": items,
+            "total_price": total_price,
+        },
+    )
+
+
+@login_required
+def cart_add(request, slug):
+    game = get_object_or_404(Game, slug=slug, is_active=True)
+    cart, _ = Cart.objects.get_or_create(user=request.user)
+    item, created = CartItem.objects.get_or_create(
+        cart=cart,
+        game=game,
+        defaults={"quantity": 1, "price_snapshot": game.price},
+    )
+    if not created:
+        item.quantity += 1
+        item.save(update_fields=["quantity"])
+
+    referer = request.META.get("HTTP_REFERER")
+    if referer:
+        return redirect(referer)
+    return redirect("cart_detail")
+
+
+@login_required
+@require_POST
+def cart_update(request, slug):
+    game = get_object_or_404(Game, slug=slug)
+    cart, _ = Cart.objects.get_or_create(user=request.user)
+    item = CartItem.objects.filter(cart=cart, game=game).first()
+    if not item:
+        return redirect("cart_detail")
+
+    quantity_raw = request.POST.get("quantity", "").strip()
+    try:
+        quantity = int(quantity_raw)
+    except (TypeError, ValueError):
+        return redirect("cart_detail")
+
+    if quantity <= 0:
+        item.delete()
+    else:
+        item.quantity = quantity
+        item.save(update_fields=["quantity"])
+    return redirect("cart_detail")
+
+
+@login_required
+def cart_remove(request, slug):
+    game = get_object_or_404(Game, slug=slug)
+    cart, _ = Cart.objects.get_or_create(user=request.user)
+    CartItem.objects.filter(cart=cart, game=game).delete()
+    return redirect("cart_detail")
+
+
+@login_required
+def checkout(request):
+    cart, _ = Cart.objects.get_or_create(user=request.user)
+    items = list(CartItem.objects.filter(cart=cart).select_related("game"))
+    total_price = Decimal("0")
+    for item in items:
+        item.subtotal = item.price_snapshot * item.quantity
+        total_price += item.subtotal
+
+    if request.method == "POST" and items:
+        order = Order.objects.create(
+            user=request.user,
+            status=Order.Status.NEW,
+            total_price=total_price,
+        )
+        order_items = [
+            OrderItem(
+                order=order,
+                game=item.game,
+                quantity=item.quantity,
+                price_snapshot=item.price_snapshot,
+            )
+            for item in items
+        ]
+        OrderItem.objects.bulk_create(order_items)
+        Payment.objects.create(order=order, provider="demo", status=Payment.PaymentStatus.PENDING)
+        CartItem.objects.filter(cart=cart).delete()
+        return redirect("order_detail", order_id=order.id)
+
+    return render(
+        request,
+        "pages/checkout.html",
+        {
+            "items": items,
+            "total_price": total_price,
+        },
+    )
+
+
+@login_required
+def orders_list(request):
+    orders = Order.objects.filter(user=request.user).order_by("-created_at")
+    return render(request, "pages/orders_list.html", {"orders": orders})
+
+
+@login_required
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    items = OrderItem.objects.filter(order=order).select_related("game")
+    return render(
+        request,
+        "pages/order_detail.html",
+        {
+            "order": order,
+            "items": items,
+        },
+    )
 
 
 def contact(request):
