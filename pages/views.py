@@ -1,4 +1,7 @@
+from django.contrib import messages
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
@@ -11,6 +14,42 @@ from reviews.models import Review
 
 def home(request):
     return render(request, "pages/home.html")
+
+
+def register(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, "Регистрация прошла успешно.")
+            return redirect("home")
+    else:
+        form = UserCreationForm()
+
+    return render(request, "pages/register.html", {"form": form})
+
+
+def user_login(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    next_url = request.GET.get("next") or request.POST.get("next") or ""
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            login(request, form.get_user())
+            return redirect(next_url or "home")
+        messages.error(request, "Неверный логин или пароль.")
+    else:
+        form = AuthenticationForm(request)
+
+    return render(request, "pages/login.html", {"form": form, "next": next_url})
+
+
+def user_logout(request):
+    logout(request)
+    return redirect("home")
 
 
 def shop(request):
