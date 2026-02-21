@@ -66,7 +66,7 @@
               <h4>{{ game.title }}</h4>
               <p class="mb-2">Цена: ${{ game.price }}</p>
               <p class="mb-3">Рейтинг: {{ game.average_rating|default_if_none:"0"|floatformat:1 }}</p>
-              <a class="main-button" href="{% url 'product_detail' slug=game.slug %}">Подробнее</a>
+              <a class="main-button" href="{% url 'product_detail' game.slug %}">Подробнее</a>
             </div>
           </div>
         </div>
