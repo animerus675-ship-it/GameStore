@@ -1,4 +1,4 @@
-from decimal import Decimal
+﻿from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth import login, logout
@@ -24,18 +24,26 @@ def home(request):
     return render(request, "pages/home.html")
 
 
+
+def _prepare_register_form(form):
+    for field_name in ("username", "password1", "password2"):
+        if field_name in form.fields:
+            form.fields[field_name].widget.attrs["class"] = "form-control"
+    return form
+
+
 def register(request):
     if request.method == "POST":
-        form = UserCreationForm(request.POST)
+        form = _prepare_register_form(UserCreationForm(request.POST))
         if form.is_valid():
             user = form.save()
             client_group, _ = Group.objects.get_or_create(name="client")
             user.groups.add(client_group)
             login(request, user)
-            messages.success(request, "Регистрация прошла успешно.")
+            messages.success(request, "Р РµРіРёСЃС‚СЂР°С†РёСЏ РїСЂРѕС€Р»Р° СѓСЃРїРµС€РЅРѕ.")
             return redirect("home")
     else:
-        form = UserCreationForm()
+        form = _prepare_register_form(UserCreationForm())
 
     return render(request, "pages/register.html", {"form": form})
 
@@ -50,7 +58,7 @@ def user_login(request):
         if form.is_valid():
             login(request, form.get_user())
             return redirect(next_url or "home")
-        messages.error(request, "Неверный логин или пароль.")
+        messages.error(request, "РќРµРІРµСЂРЅС‹Р№ Р»РѕРіРёРЅ РёР»Рё РїР°СЂРѕР»СЊ.")
     else:
         form = AuthenticationForm(request)
 
@@ -307,12 +315,13 @@ def manage_order_status(request, order_id):
     if new_status in valid_statuses:
         order.status = new_status
         order.save(update_fields=["status"])
-        messages.success(request, "Статус заказа обновлен.")
+        messages.success(request, "РЎС‚Р°С‚СѓСЃ Р·Р°РєР°Р·Р° РѕР±РЅРѕРІР»РµРЅ.")
     else:
-        messages.error(request, "Некорректный статус.")
+        messages.error(request, "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ СЃС‚Р°С‚СѓСЃ.")
 
     return redirect("manage_orders")
 
 
 def contact(request):
     return render(request, "pages/contact.html")
+

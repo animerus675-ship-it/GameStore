@@ -1,0 +1,246 @@
+body {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+}
+
+.main-nav .nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+
+.main-nav .nav li a {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 11px;
+  white-space: nowrap;
+}
+
+.main-button a,
+button,
+.btn {
+  font-weight: 600;
+}
+
+.main-nav .nav .profile-nav-item {
+  margin-left: 4px;
+}
+
+.main-nav .nav .profile-nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px;
+}
+
+.game-card-link {
+  display: block;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.game-card-link:hover {
+  color: inherit;
+}
+
+.item.h-100 .game-card-link {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.item.h-100 .game-card-link:hover {
+  transform: translateY(-2px);
+}
+
+.profile-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.22);
+}
+
+.error-list {
+  margin: 0;
+  padding-left: 18px;
+  color: #d63384;
+  font-size: 14px;
+}
+
+.error-list li + li {
+  margin-top: 4px;
+}
+
+.profile-page {
+  max-width: 920px;
+}
+
+.profile-card {
+  background: #fff;
+  border-radius: 22px;
+  padding: 24px;
+  box-shadow: 0 12px 35px rgba(7, 23, 49, 0.08);
+  margin-bottom: 24px;
+}
+
+.profile-main {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.profile-avatar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-page-avatar {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #f1f1f1;
+  box-shadow: 0 8px 24px rgba(7, 23, 49, 0.15);
+}
+
+.profile-info h4 {
+  margin-bottom: 6px;
+}
+
+.profile-info p {
+  margin-bottom: 8px;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.profile-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f7f7f9;
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: #4a5665;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.profile-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.profile-action-card {
+  display: block;
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 10px 24px rgba(7, 23, 49, 0.08);
+  text-decoration: none;
+  color: #1f2735;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.profile-action-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(231, 94, 141, 0.12);
+  color: #e75e8d;
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.profile-action-card h5 {
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.profile-action-card p {
+  margin: 0;
+  color: #586273;
+}
+
+.profile-action-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 16px 36px rgba(7, 23, 49, 0.16);
+}
+
+.profile-action-danger h5 {
+  color: #e75e8d;
+}
+
+.avatar-upload-form .btn {
+  border-radius: 999px;
+  font-size: 13px;
+  padding: 6px 12px;
+}
+
+@media (max-width: 1199px) {
+  .main-nav .nav li a {
+    font-size: 14px;
+    padding: 8px 9px;
+  }
+
+  .profile-actions-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 991px) {
+  .main-nav .nav {
+    flex-wrap: wrap;
+  }
+
+  .profile-actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.footer-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #ffffff !important;
+  padding: 16px 0 12px;
+}
+
+.footer-center strong {
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.3;
+  margin: 0;
+  color: #ffffff !important;
+}
+
+.footer-center p {
+  margin: 2px 0 !important;
+  line-height: 1.4 !important;
+  font-size: 15px;
+  color: #ffffff !important;
+}

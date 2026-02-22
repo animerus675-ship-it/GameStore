@@ -1,0 +1,85 @@
+{% extends "layout/base.html" %}
+{% load static %}
+
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+<div class="page-heading header-text">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <h3>Профиль</h3>
+        <span class="breadcrumb"><a href="{% url 'home' %}">Главная</a> &gt; Профиль</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="container profile-page">
+    <div class="profile-card">
+      <div class="profile-main">
+        <div class="profile-avatar-wrap">
+          {% if profile.avatar %}
+            <img src="{{ profile.avatar.url }}" alt="Аватар" class="profile-page-avatar">
+          {% else %}
+            <img src="{% static 'images/avatar.png' %}" alt="Аватар" class="profile-page-avatar">
+          {% endif %}
+          <form id="avatar-upload-form" method="post" enctype="multipart/form-data" class="avatar-upload-form">
+            {% csrf_token %}
+            <input id="avatar-input" type="file" name="avatar" accept="image/jpeg,image/png,image/webp" hidden>
+            <button type="button" id="avatar-select-btn" class="btn btn-outline-primary btn-sm">Изменить фото</button>
+          </form>
+        </div>
+        <div class="profile-info">
+          <h4>{{ user.username }}</h4>
+          <p>{{ user.email|default:"Email не указан" }}</p>
+          <div class="profile-stats">
+            <span class="profile-badge"><i class="fa fa-heart"></i> Избранное: {{ favorites_count }}</span>
+            <span class="profile-badge"><i class="fa fa-shopping-bag"></i> Заказы: {{ orders_count }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-actions-grid">
+      <a href="{% url 'orders_list' %}" class="profile-action-card">
+        <div class="profile-action-icon"><i class="fa fa-list"></i></div>
+        <h5>Мои заказы</h5>
+        <p>История покупок и текущие статусы заказов.</p>
+      </a>
+      <a href="{% url 'favorites_list' %}" class="profile-action-card">
+        <div class="profile-action-icon"><i class="fa fa-heart"></i></div>
+        <h5>Избранное</h5>
+        <p>Список сохраненных игр для быстрого доступа.</p>
+      </a>
+      <a href="{% url 'logout' %}" class="profile-action-card profile-action-danger">
+        <div class="profile-action-icon"><i class="fa fa-sign-out"></i></div>
+        <h5>Выйти</h5>
+        <p>Завершить текущую сессию аккаунта.</p>
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    var selectBtn = document.getElementById("avatar-select-btn");
+    var input = document.getElementById("avatar-input");
+    var form = document.getElementById("avatar-upload-form");
+    if (!selectBtn || !input || !form) return;
+
+    selectBtn.addEventListener("click", function () {
+      input.click();
+    });
+
+    input.addEventListener("change", function () {
+      if (input.files && input.files.length > 0) {
+        form.submit();
+      }
+    });
+  })();
+</script>
+{% endblock %}
