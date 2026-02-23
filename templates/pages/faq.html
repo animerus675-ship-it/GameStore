@@ -1,0 +1,63 @@
+{% extends "layout/base.html" %}
+
+{% block title %}BBGame - FAQ{% endblock %}
+
+{% block content %}
+<div class="page-heading header-text">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <h3>FAQ</h3>
+        <span class="breadcrumb"><a href="{% url 'home' %}">Home</a> &gt; FAQ</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="section-heading mb-4">
+          <h6>Support</h6>
+          <h2>Frequently Asked Questions</h2>
+        </div>
+
+        <div class="mb-4">
+          <h5>1. How do I buy a game on BBGame?</h5>
+          <p>Open the game page, click <strong>Add to cart</strong>, then complete checkout from your cart.</p>
+        </div>
+
+        <div class="mb-4">
+          <h5>2. Which payment methods are available?</h5>
+          <p>Payments are currently processed in demo mode. Additional payment providers can be enabled later.</p>
+        </div>
+
+        <div class="mb-4">
+          <h5>3. Can I request a refund?</h5>
+          <p>Yes, refund requests are handled manually by support after order verification.</p>
+        </div>
+
+        <div class="mb-4">
+          <h5>4. How does delivery work for digital games?</h5>
+          <p>Games are delivered digitally to your account right after successful order processing.</p>
+        </div>
+
+        <div class="mb-4">
+          <h5>5. Do I need an account to place an order?</h5>
+          <p>Yes. You need to register and log in to use cart, favorites, reviews, and order history.</p>
+        </div>
+
+        <div class="mb-4">
+          <h5>6. How are discounts applied?</h5>
+          <p>If a game has a discount, the final price is recalculated automatically and shown in the catalog and product page.</p>
+        </div>
+
+        <div class="main-button">
+          <a href="{% url 'shop' %}">Go to Shop</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

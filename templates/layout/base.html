@@ -1,4 +1,4 @@
-{% load static %}
+{% load static account_extras %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-  <title>{% block title %}Lugx Gaming{% endblock %}</title>
+  <title>{% block title %}BBGame{% endblock %}</title>
 
   <link href="{% static 'theme/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'theme/assets/css/fontawesome.css' %}">
@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="{% static 'theme/assets/css/owl.css' %}">
   <link rel="stylesheet" href="{% static 'theme/assets/css/animate.css' %}">
   <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css">
+  <link rel="stylesheet" href="{% static 'css/custom.css' %}">
 </head>
 <body>
   <div id="js-preloader" class="js-preloader">
@@ -33,24 +34,26 @@
         <div class="col-12">
           <nav class="main-nav">
             <a href="{% url 'home' %}" class="logo">
-              <img src="{% static 'theme/assets/images/logo.png' %}" alt="Lugx" style="width: 158px;">
+              <h1>BBGame</h1>
             </a>
             <ul class="nav">
               <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a></li>
               <li><a href="{% url 'shop' %}" class="{% if request.resolver_match.url_name == 'shop' %}active{% endif %}">Our Shop</a></li>
-              <li><a href="{% url 'product_detail' %}" class="{% if request.resolver_match.url_name == 'product_detail' %}active{% endif %}">Product Details</a></li>
               <li><a href="{% url 'contact' %}" class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact Us</a></li>
-              <li><a href="{% url 'cart_detail' %}" class="{% if request.resolver_match.url_name == 'cart_detail' %}active{% endif %}">Корзина</a></li>
+              <li><a href="{% url 'faq' %}" class="{% if request.resolver_match.url_name == 'faq' %}active{% endif %}">FAQ</a></li>
+              <li><a href="{% url 'cart_detail' %}" class="{% if request.resolver_match.url_name == 'cart_detail' %}active{% endif %}">Cart</a></li>
               {% if user.is_authenticated %}
-                <li><a href="{% url 'orders_list' %}" class="{% if request.resolver_match.url_name == 'orders_list' %}active{% endif %}">Мои заказы</a></li>
                 {% if user.is_superuser or perms.orders.change_order %}
-                  <li><a href="{% url 'manage_orders' %}" class="{% if request.resolver_match.url_name == 'manage_orders' %}active{% endif %}">Управление заказами</a></li>
+                  <li><a href="{% url 'manage_orders' %}" class="{% if request.resolver_match.url_name == 'manage_orders' %}active{% endif %}">Manage Orders</a></li>
                 {% endif %}
-                <li><a href="#">Привет, {{ user.username }}</a></li>
-                <li><a href="{% url 'logout' %}">Выход</a></li>
+                <li class="profile-nav-item">
+                  <a href="{% url 'profile' %}" class="profile-nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" title="Profile">
+                    <img src="{{ user|avatar_url }}" alt="" class="profile-avatar">
+                  </a>
+                </li>
               {% else %}
-                <li><a href="{% url 'login' %}" class="{% if request.resolver_match.url_name == 'login' %}active{% endif %}">Вход</a></li>
-                <li><a href="{% url 'register' %}" class="{% if request.resolver_match.url_name == 'register' %}active{% endif %}">Регистрация</a></li>
+                <li><a href="{% url 'login' %}" class="{% if request.resolver_match.url_name == 'login' %}active{% endif %}">Login</a></li>
+                <li><a href="{% url 'register' %}" class="{% if request.resolver_match.url_name == 'register' %}active{% endif %}">Register</a></li>
               {% endif %}
             </ul>
             <a class="menu-trigger">
@@ -75,7 +78,8 @@
   <footer>
     <div class="container">
       <div class="col-lg-12">
-        <p>Copyright &copy; 2048 LUGX Gaming Company. All rights reserved. &nbsp;&nbsp; <a rel="nofollow" href="https://templatemo.com" target="_blank">Design: TemplateMo</a></p>
+        <p>Copyright &copy; 2026 All rights reserved.</p>
+        <p>All rights belong to Alimzhanov Alimkhan</p>
       </div>
     </div>
   </footer>
@@ -86,5 +90,7 @@
   <script src="{% static 'theme/assets/js/owl-carousel.js' %}"></script>
   <script src="{% static 'theme/assets/js/counter.js' %}"></script>
   <script src="{% static 'theme/assets/js/custom.js' %}"></script>
+  <script src="{% static 'js/favorite.js' %}"></script>
+  {% block extra_js %}{% endblock %}
 </body>
 </html>

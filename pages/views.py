@@ -7,21 +7,35 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import Group
 from django.core.paginator import Paginator
 from django.db.models import Avg
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from accounts.utils import is_manager
+from accounts.models import Profile
 from cart.models import Cart, CartItem
 from catalog.models import Game
 from catalog.views import shop as catalog_shop
+from core.models import News
 from favorites.models import Favorite
 from orders.models import Order, OrderItem, Payment
 from reviews.models import Review
 
 
 def home(request):
-    return render(request, "pages/home.html")
+    news_list = News.objects.order_by("-created_at")[:4]
+    return render(request, "pages/home.html", {"news_list": news_list})
+
+
+def news_list(request):
+    items = News.objects.order_by("-created_at")
+    return render(request, "pages/news_list.html", {"news_list": items})
+
+
+def news_detail(request, slug):
+    news = get_object_or_404(News, slug=slug)
+    return render(request, "pages/news_detail.html", {"news": news})
 
 
 
@@ -29,6 +43,8 @@ def _prepare_register_form(form):
     for field_name in ("username", "password1", "password2"):
         if field_name in form.fields:
             form.fields[field_name].widget.attrs["class"] = "form-control"
+            # Hide built-in help texts by default; show only validation errors in template.
+            form.fields[field_name].help_text = ""
     return form
 
 
@@ -40,7 +56,7 @@ def register(request):
             client_group, _ = Group.objects.get_or_create(name="client")
             user.groups.add(client_group)
             login(request, user)
-            messages.success(request, "Р РµРіРёСЃС‚СЂР°С†РёСЏ РїСЂРѕС€Р»Р° СѓСЃРїРµС€РЅРѕ.")
+            messages.success(request, "Registration completed successfully.")
             return redirect("home")
     else:
         form = _prepare_register_form(UserCreationForm())
@@ -58,7 +74,7 @@ def user_login(request):
         if form.is_valid():
             login(request, form.get_user())
             return redirect(next_url or "home")
-        messages.error(request, "РќРµРІРµСЂРЅС‹Р№ Р»РѕРіРёРЅ РёР»Рё РїР°СЂРѕР»СЊ.")
+        messages.error(request, "Invalid username or password.")
     else:
         form = AuthenticationForm(request)
 
@@ -72,6 +88,32 @@ def user_logout(request):
 
 def shop(request):
     return catalog_shop(request)
+
+
+@login_required
+def profile_view(request):
+    profile, _ = Profile.objects.get_or_create(
+        user=request.user,
+        defaults={"display_name": request.user.username},
+    )
+
+    if request.method == "POST" and request.FILES.get("avatar"):
+        profile.avatar = request.FILES["avatar"]
+        profile.save(update_fields=["avatar"])
+        messages.success(request, "Avatar updated.")
+        return redirect("profile")
+
+    favorites_count = Favorite.objects.filter(user=request.user).count()
+    cart_count = CartItem.objects.filter(cart__user=request.user).count()
+    return render(
+        request,
+        "profile.html",
+        {
+            "profile": profile,
+            "favorites_count": favorites_count,
+            "cart_count": cart_count,
+        },
+    )
 
 
 def product_detail(request, slug):
@@ -104,14 +146,35 @@ def product_detail(request, slug):
 
 
 @login_required
+def favorites_list(request):
+    favorites = (
+        Favorite.objects.filter(user=request.user)
+        .select_related("game")
+        .prefetch_related("game__screenshots")
+        .annotate(average_rating=Avg("game__reviews__rating"))
+        .order_by("-created_at")
+    )
+    return render(request, "favorites.html", {"favorites": favorites})
+
+
 @require_POST
 def toggle_favorite(request, slug):
+    if not request.user.is_authenticated:
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"error": "auth_required"}, status=401)
+        return redirect(f"{reverse('login')}?next={request.path}")
+
     game = get_object_or_404(Game, slug=slug)
     favorite = Favorite.objects.filter(user=request.user, game=game).first()
     if favorite:
         favorite.delete()
+        status = "removed"
     else:
         Favorite.objects.create(user=request.user, game=game)
+        status = "added"
+
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({"status": status})
     return redirect("product_detail", slug=game.slug)
 
 
@@ -315,13 +378,17 @@ def manage_order_status(request, order_id):
     if new_status in valid_statuses:
         order.status = new_status
         order.save(update_fields=["status"])
-        messages.success(request, "РЎС‚Р°С‚СѓСЃ Р·Р°РєР°Р·Р° РѕР±РЅРѕРІР»РµРЅ.")
+        messages.success(request, "Order status has been updated.")
     else:
-        messages.error(request, "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ СЃС‚Р°С‚СѓСЃ.")
+        messages.error(request, "Invalid status.")
 
     return redirect("manage_orders")
 
 
 def contact(request):
     return render(request, "pages/contact.html")
+
+
+def faq(request):
+    return render(request, "pages/faq.html")
 
