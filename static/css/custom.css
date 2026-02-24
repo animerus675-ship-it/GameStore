@@ -40,7 +40,13 @@ button,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 8px;
+  gap: 8px;
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+.main-nav .nav .profile-nav-link span {
+  font-weight: 600;
 }
 
 .game-card-link {
@@ -60,6 +66,140 @@ button,
 
 .item.h-100 .game-card-link:hover {
   transform: translateY(-2px);
+}
+
+.steam-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 18px;
+  text-decoration: none;
+  color: inherit;
+  background: #ffffff;
+  height: 100%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.steam-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(12, 26, 48, 0.14);
+  background-color: #fdfdff;
+  color: inherit;
+}
+
+.steam-card__thumb {
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: 14px;
+  flex: 0 0 auto;
+  background: #eef2f7;
+}
+
+.steam-card__thumb img,
+.steam-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.game-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.steam-card__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6d7685;
+  background: linear-gradient(135deg, #edf2f8 0%, #e5ebf4 100%);
+}
+
+.steam-card__info {
+  min-width: 0;
+  flex: 1;
+}
+
+.steam-card__publisher {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.72;
+  margin-bottom: 5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.steam-card__title {
+  margin: 0 0 8px;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.steam-card__meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.steam-card__price {
+  font-weight: 700;
+  color: #1f2a39;
+}
+
+.old-price {
+  color: #7d8796;
+  text-decoration: line-through;
+  margin-right: 6px;
+}
+
+.new-price {
+  color: #e24b4b;
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+.discount-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(226, 75, 75, 0.12);
+  color: #e24b4b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.steam-card__rating {
+  font-size: 14px;
+  color: #556173;
+}
+
+.product-image {
+  max-width: 450px;
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto 16px;
+}
+
+.news-image {
+  display: block;
+  width: 100%;
+  max-width: 700px;
+  height: auto;
+  margin: 0 auto;
 }
 
 .profile-avatar {
@@ -205,6 +345,10 @@ button,
     padding: 8px 9px;
   }
 
+  .main-nav .nav .profile-nav-link span {
+    display: none;
+  }
+
   .profile-actions-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -217,6 +361,28 @@ button,
 
   .profile-actions-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .steam-card {
+    padding: 12px;
+    gap: 10px;
+    border-radius: 14px;
+  }
+
+  .steam-card__thumb {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+  }
+
+  .steam-card__title {
+    font-size: 16px;
+  }
+
+  .steam-card__publisher {
+    font-size: 11px;
   }
 }
 

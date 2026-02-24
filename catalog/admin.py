@@ -12,11 +12,41 @@ class PublisherAdmin(admin.ModelAdmin):
 
 @admin.register(Game)
 class GameAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "slug", "price", "discount_percent", "release_year", "is_active")
+    list_display = (
+        "id",
+        "title",
+        "slug",
+        "has_cover",
+        "price",
+        "discount_percent",
+        "discounted_price",
+        "release_year",
+        "is_active",
+    )
     list_filter = ("is_active", "release_year", "publisher")
     search_fields = ("title", "slug")
     prepopulated_fields = {"slug": ("title",)}
     filter_horizontal = ("genres", "platforms", "tags")
+    readonly_fields = ("discounted_price",)
+    fields = (
+        "title",
+        "slug",
+        "description",
+        "cover",
+        "price",
+        "discount_percent",
+        "discounted_price",
+        "release_year",
+        "is_active",
+        "publisher",
+        "genres",
+        "platforms",
+        "tags",
+    )
+
+    @admin.display(boolean=True, description="Has cover")
+    def has_cover(self, obj):
+        return bool(obj.cover_url)
 
 
 @admin.register(Screenshot)

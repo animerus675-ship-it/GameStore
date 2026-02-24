@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -34,8 +35,9 @@ class Game(models.Model):
     title = models.CharField(max_length=180)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     description = models.TextField()
+    cover = models.ImageField(upload_to="games/covers/", blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    discount_percent = models.IntegerField(
+    discount_percent = models.PositiveIntegerField(
         default=0,
         validators=[MinValueValidator(0), MaxValueValidator(90)],
     )
@@ -67,6 +69,24 @@ class Game(models.Model):
         if not self.slug:
             self.slug = generate_unique_slug(self, self.title)
         super().save(*args, **kwargs)
+
+    @property
+    def discounted_price(self):
+        base_price = self.price if self.price is not None else Decimal("0")
+        if self.discount_percent in (None, 0):
+            return base_price
+        return (
+            base_price * (Decimal("1") - (Decimal(self.discount_percent) / Decimal("100")))
+        ).quantize(Decimal("0.01"))
+
+    @property
+    def cover_url(self):
+        if not self.cover:
+            return ""
+        try:
+            return self.cover.url
+        except Exception:
+            return ""
 
     def __str__(self):
         return self.title

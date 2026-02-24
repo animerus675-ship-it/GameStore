@@ -1,15 +1,15 @@
 {% extends "layout/base.html" %}
 {% load static %}
 
-{% block title %}Избранное{% endblock %}
+{% block title %}Favorites{% endblock %}
 
 {% block content %}
 <div class="page-heading header-text">
   <div class="container">
     <div class="row">
       <div class="col-lg-12">
-        <h3>Избранное</h3>
-        <span class="breadcrumb"><a href="{% url 'home' %}">Главная</a> &gt; Избранное</span>
+        <h3>Favorites</h3>
+        <span class="breadcrumb"><a href="{% url 'home' %}">Home</a> &gt; Favorites</span>
       </div>
     </div>
   </div>
@@ -35,15 +35,23 @@
               </div>
               <div class="down-content">
                 <h4>{{ favorite.game.title }}</h4>
-                <p>Цена: ${{ favorite.game.price }}</p>
-                <p>Рейтинг: {{ favorite.average_rating|default_if_none:"0"|floatformat:1 }}</p>
+                <p>
+                  {% if favorite.game.discount_percent > 0 %}
+                    <span class="old-price">${{ favorite.game.price }}</span>
+                    <span class="new-price">${{ favorite.game.discounted_price }}</span>
+                    <span class="discount-badge">-{{ favorite.game.discount_percent }}%</span>
+                  {% else %}
+                    Price: ${{ favorite.game.price }}
+                  {% endif %}
+                </p>
+                <p>Rating: {{ favorite.average_rating|default_if_none:"0"|floatformat:1 }}</p>
               </div>
             </a>
           </div>
         </div>
       {% empty %}
         <div class="col-lg-12">
-          <p>Пока нет избранных игр.</p>
+          <p>No favorite games yet.</p>
         </div>
       {% endfor %}
     </div>

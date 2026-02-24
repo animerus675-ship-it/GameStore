@@ -1,13 +1,13 @@
 {% extends "layout/base.html" %}
 
-{% block title %}Оформление заказа{% endblock %}
+{% block title %}Checkout{% endblock %}
 
 {% block content %}
 <div class="page-heading header-text">
   <div class="container">
     <div class="row">
       <div class="col-lg-12">
-        <h3>Оформление заказа</h3>
+        <h3>Checkout</h3>
       </div>
     </div>
   </div>
@@ -25,15 +25,15 @@
         {% endfor %}
       </ul>
 
-      <h5 class="mb-3">Итого: ${{ total_price }}</h5>
+      <h5 class="mb-3">Total: ${{ total_price }}</h5>
 
       <form method="post">
         {% csrf_token %}
-        <button type="submit" class="btn btn-primary">Подтвердить заказ</button>
+        <button type="submit" class="btn btn-primary">Confirm order</button>
       </form>
     {% else %}
-      <p>В корзине нет товаров для оформления.</p>
-      <a href="{% url 'shop' %}" class="btn btn-secondary">Вернуться в магазин</a>
+      <p>Your cart has no items to checkout.</p>
+      <a href="{% url 'shop' %}" class="btn btn-secondary">Back to shop</a>
     {% endif %}
   </div>
 </div>

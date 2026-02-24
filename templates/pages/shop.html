@@ -1,6 +1,6 @@
 {% extends "layout/base.html" %}
 
-{% block title %}Lugx Gaming - Shop{% endblock %}
+{% block title %}BBGame - Shop{% endblock %}
 
 {% block content %}
 <div class="page-heading header-text">
@@ -23,13 +23,13 @@
             type="text"
             name="q"
             class="form-control"
-            placeholder="Поиск по названию"
+            placeholder="Search by title"
             value="{{ q }}"
           >
         </div>
         <div class="col-lg-3 col-md-6">
           <select name="genre" class="form-select">
-            <option value="">Все жанры</option>
+            <option value="">All genres</option>
             {% for item in genres %}
               <option value="{{ item.slug }}" {% if genre == item.slug %}selected{% endif %}>{{ item.name }}</option>
             {% endfor %}
@@ -37,22 +37,38 @@
         </div>
         <div class="col-lg-3 col-md-6">
           <select name="platform" class="form-select">
-            <option value="">Все платформы</option>
+            <option value="">All platforms</option>
             {% for item in platforms %}
               <option value="{{ item.slug }}" {% if platform == item.slug %}selected{% endif %}>{{ item.name }}</option>
             {% endfor %}
           </select>
         </div>
-        <div class="col-lg-2 col-md-6">
-          <select name="sort" class="form-select">
-            <option value="">Сначала новые</option>
-            <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Сначала новые</option>
-            <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Цена по возрастанию</option>
-            <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Цена по убыванию</option>
+        <div class="col-lg-3 col-md-6">
+          <select name="publisher" class="form-select">
+            <option value="">All publishers</option>
+            {% for item in publishers %}
+              <option value="{{ item.slug }}" {% if publisher == item.slug %}selected{% endif %}>{{ item.name }}</option>
+            {% endfor %}
           </select>
         </div>
-        <div class="col-lg-1 col-md-12 d-grid">
-          <button type="submit" class="btn btn-primary">OK</button>
+        <div class="col-lg-3 col-md-6">
+          <select name="tag" class="form-select">
+            <option value="">All tags</option>
+            {% for item in tags %}
+              <option value="{{ item.slug }}" {% if tag == item.slug %}selected{% endif %}>{{ item.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <select name="sort" class="form-select">
+            <option value="">Newest first</option>
+            <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest first</option>
+            <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Price: low to high</option>
+            <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price: high to low</option>
+          </select>
+        </div>
+        <div class="col-lg-3 col-md-6 d-grid">
+          <button type="submit" class="btn btn-primary">Search</button>
         </div>
       </div>
     </form>
@@ -61,18 +77,45 @@
       {% for game in games %}
         <div class="col-lg-4 col-md-6 mb-4">
           <div class="item h-100">
-            <div class="down-content">
-              <span class="category">{{ game.publisher.name|default:"No Publisher" }}</span>
-              <h4>{{ game.title }}</h4>
-              <p class="mb-2">Цена: ${{ game.price }}</p>
-              <p class="mb-3">Рейтинг: {{ game.average_rating|default_if_none:"0"|floatformat:1 }}</p>
-              <a class="main-button" href="{% url 'product_detail' game.slug %}">Подробнее</a>
-            </div>
+            <a class="steam-card" href="{% url 'product_detail' game.slug %}" aria-label="Open {{ game.title }}">
+              <div class="steam-card__thumb">
+                {% if game.cover_url %}
+                  <img
+                    src="{{ game.cover_url }}"
+                    alt="{{ game.title }}"
+                    class="steam-card__image game-thumb"
+                    loading="lazy"
+                    onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none');"
+                  >
+                  <div class="steam-card__placeholder d-none">NO IMAGE</div>
+                {% else %}
+                  <div class="steam-card__placeholder">NO IMAGE</div>
+                {% endif %}
+              </div>
+              <div class="steam-card__info">
+                <div class="steam-card__publisher">{{ game.publisher.name|default:"No Publisher" }}</div>
+                <div class="steam-card__title">{{ game.title }}</div>
+                <div class="steam-card__meta">
+                  {% if game.discount_percent > 0 %}
+                    <span class="old-price">${{ game.price }}</span>
+                    <span class="new-price">${{ game.discounted_price }}</span>
+                    <span class="discount-badge">-{{ game.discount_percent }}%</span>
+                  {% else %}
+                    {% if game.price %}
+                      <span class="steam-card__price">${{ game.price }}</span>
+                    {% else %}
+                      <span class="steam-card__price">Free</span>
+                    {% endif %}
+                  {% endif %}
+                  <span class="steam-card__rating">Rating: {{ game.average_rating|default_if_none:"0"|floatformat:1 }}</span>
+                </div>
+              </div>
+            </a>
           </div>
         </div>
       {% empty %}
         <div class="col-12">
-          <p>Игры не найдены</p>
+          <p>No games found.</p>
         </div>
       {% endfor %}
     </div>

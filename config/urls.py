@@ -15,6 +15,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from pathlib import Path
+
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from django.views.defaults import page_not_found, server_error
@@ -24,6 +28,10 @@ urlpatterns = [
     path("", include("pages.urls")),
     path("api/", include("api_app.urls")),
 ]
+
+if settings.DEBUG:
+    # Legacy local uploads fallback: old cover files were saved under BASE_DIR/games/covers.
+    urlpatterns += static("/games/covers/", document_root=Path(settings.BASE_DIR) / "games" / "covers")
 
 handler404 = lambda request, exception: page_not_found(  # noqa: E731
     request, exception, template_name="errors/404.html"
