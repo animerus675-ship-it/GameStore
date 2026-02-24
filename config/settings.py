@@ -38,16 +38,16 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "core",
-    "pages",
-    "taxonomy",
-    "catalog",
-    "accounts",
-    "favorites",
-    "reviews",
-    "cart",
-    "orders",
-    "api_app",
+    "core.apps.CoreConfig",
+    "pages.apps.PagesConfig",
+    "taxonomy.apps.TaxonomyConfig",
+    "catalog.apps.CatalogConfig",
+    "accounts.apps.AccountsConfig",
+    "favorites.apps.FavoritesConfig",
+    "reviews.apps.ReviewsConfig",
+    "cart.apps.CartConfig",
+    "orders.apps.OrdersConfig",
+    "api_app.apps.ApiAppConfig",
     "cloudinary_storage",
     "cloudinary",
 ]
@@ -142,6 +142,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "noreply@bbgame.local"
 
 CLOUDINARY_STORAGE = {
     "CLOUD_NAME": os.getenv("CLOUDINARY_CLOUD_NAME"),

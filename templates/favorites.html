@@ -24,13 +24,11 @@
             <a class="game-card-link" href="{% url 'product_detail' favorite.game.slug %}" aria-label="{{ favorite.game.title }}">
               <div class="thumb">
                 {% with game=favorite.game %}
-                  {% for screenshot in game.screenshots.all %}
-                    {% if forloop.first %}
-                      <img src="{{ screenshot.image.url }}" alt="{{ screenshot.alt_text|default:game.title }}">
-                    {% endif %}
-                  {% empty %}
+                  {% if game.primary_image_url %}
+                    <img src="{{ game.primary_image_url }}" alt="{{ game.primary_image_alt }}">
+                  {% else %}
                     <img src="{% static 'theme/assets/images/trending-01.jpg' %}" alt="{{ game.title }}">
-                  {% endfor %}
+                  {% endif %}
                 {% endwith %}
               </div>
               <div class="down-content">

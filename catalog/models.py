@@ -31,10 +31,27 @@ class Publisher(models.Model):
         return self.name
 
 
+class Developer(models.Model):
+    name = models.CharField(max_length=140, unique=True)
+    slug = models.SlugField(max_length=160, unique=True, blank=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = generate_unique_slug(self, self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+
 class Game(models.Model):
     title = models.CharField(max_length=180)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     description = models.TextField()
+    detailed_description = models.TextField(blank=True, default="")
     cover = models.ImageField(upload_to="games/covers/", blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     discount_percent = models.PositiveIntegerField(
@@ -46,6 +63,13 @@ class Game(models.Model):
 
     publisher = models.ForeignKey(
         Publisher,
+        on_delete=models.SET_NULL,
+        related_name="games",
+        null=True,
+        blank=True,
+    )
+    developer = models.ForeignKey(
+        Developer,
         on_delete=models.SET_NULL,
         related_name="games",
         null=True,
@@ -87,6 +111,32 @@ class Game(models.Model):
             return self.cover.url
         except Exception:
             return ""
+
+    def _first_screenshot(self):
+        prefetched = getattr(self, "_prefetched_objects_cache", {})
+        screenshots = prefetched.get("screenshots")
+        if screenshots is not None:
+            if not screenshots:
+                return None
+            return min(screenshots, key=lambda item: item.id)
+        return self.screenshots.order_by("id").first()
+
+    @property
+    def primary_image_url(self):
+        first_screenshot = self._first_screenshot()
+        if first_screenshot and first_screenshot.image:
+            try:
+                return first_screenshot.image.url
+            except Exception:
+                pass
+        return self.cover_url
+
+    @property
+    def primary_image_alt(self):
+        first_screenshot = self._first_screenshot()
+        if first_screenshot and first_screenshot.alt_text:
+            return first_screenshot.alt_text
+        return self.title
 
     def __str__(self):
         return self.title

@@ -3,7 +3,7 @@
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import Group
 from django.core.paginator import Paginator
 from django.db.models import Avg
@@ -21,6 +21,7 @@ from core.models import News
 from favorites.models import Favorite
 from orders.models import Order, OrderItem, Payment
 from reviews.models import Review
+from .forms import RegisterForm
 
 
 def home(request):
@@ -40,7 +41,7 @@ def news_detail(request, slug):
 
 
 def _prepare_register_form(form):
-    for field_name in ("username", "password1", "password2"):
+    for field_name in ("username", "email", "password1", "password2"):
         if field_name in form.fields:
             form.fields[field_name].widget.attrs["class"] = "form-control"
             # Hide built-in help texts by default; show only validation errors in template.
@@ -50,7 +51,7 @@ def _prepare_register_form(form):
 
 def register(request):
     if request.method == "POST":
-        form = _prepare_register_form(UserCreationForm(request.POST))
+        form = _prepare_register_form(RegisterForm(request.POST))
         if form.is_valid():
             user = form.save()
             client_group, _ = Group.objects.get_or_create(name="client")
@@ -59,7 +60,7 @@ def register(request):
             messages.success(request, "Registration completed successfully.")
             return redirect("home")
     else:
-        form = _prepare_register_form(UserCreationForm())
+        form = _prepare_register_form(RegisterForm())
 
     return render(request, "pages/register.html", {"form": form})
 
@@ -118,7 +119,11 @@ def profile_view(request):
 
 def product_detail(request, slug):
     game = get_object_or_404(
-        Game.objects.select_related("publisher").prefetch_related("genres", "platforms", "tags"),
+        Game.objects.select_related("publisher", "developer", "system_requirement").prefetch_related(
+            "platforms",
+            "tags",
+            "screenshots",
+        ),
         slug=slug,
     )
     reviews = Review.objects.filter(game=game).select_related("user").order_by("-created_at")
@@ -131,6 +136,11 @@ def product_detail(request, slug):
         is_favorite = Favorite.objects.filter(user=request.user, game=game).exists()
         user_review = reviews.filter(user=request.user).first()
 
+    try:
+        system_requirement = game.system_requirement
+    except Exception:
+        system_requirement = None
+
     return render(
         request,
         "pages/product_detail.html",
@@ -141,6 +151,7 @@ def product_detail(request, slug):
             "reviews_count": reviews_count,
             "is_favorite": is_favorite,
             "user_review": user_review,
+            "system_requirement": system_requirement,
         },
     )
 

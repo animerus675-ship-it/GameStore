@@ -28,14 +28,6 @@
           >
         </div>
         <div class="col-lg-3 col-md-6">
-          <select name="genre" class="form-select">
-            <option value="">All genres</option>
-            {% for item in genres %}
-              <option value="{{ item.slug }}" {% if genre == item.slug %}selected{% endif %}>{{ item.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="col-lg-3 col-md-6">
           <select name="platform" class="form-select">
             <option value="">All platforms</option>
             {% for item in platforms %}
@@ -79,10 +71,10 @@
           <div class="item h-100">
             <a class="steam-card" href="{% url 'product_detail' game.slug %}" aria-label="Open {{ game.title }}">
               <div class="steam-card__thumb">
-                {% if game.cover_url %}
+                {% if game.primary_image_url %}
                   <img
-                    src="{{ game.cover_url }}"
-                    alt="{{ game.title }}"
+                    src="{{ game.primary_image_url }}"
+                    alt="{{ game.primary_image_alt }}"
                     class="steam-card__image game-thumb"
                     loading="lazy"
                     onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none');"

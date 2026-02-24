@@ -2,14 +2,13 @@ from django.core.paginator import Paginator
 from django.db.models import Avg, Q
 from django.shortcuts import render
 
-from taxonomy.models import Genre, Platform, Tag
+from taxonomy.models import Platform, Tag
 
 from .models import Game, Publisher
 
 
 def shop(request):
     q = request.GET.get("q", "").strip()
-    genre = request.GET.get("genre", "").strip()
     platform = request.GET.get("platform", "").strip()
     publisher = request.GET.get("publisher", "").strip()
     tag = request.GET.get("tag", "").strip()
@@ -18,7 +17,7 @@ def shop(request):
     games_qs = (
         Game.objects.filter(is_active=True)
         .select_related("publisher")
-        .prefetch_related("genres", "platforms", "tags")
+        .prefetch_related("platforms", "tags", "screenshots")
         .annotate(average_rating=Avg("reviews__rating"))
     )
 
@@ -28,8 +27,6 @@ def shop(request):
             | Q(publisher__name__icontains=q)
             | Q(tags__name__icontains=q)
         )
-    if genre:
-        games_qs = games_qs.filter(genres__slug=genre)
     if platform:
         games_qs = games_qs.filter(platforms__slug=platform)
     if publisher:
@@ -53,18 +50,18 @@ def shop(request):
     games = paginator.get_page(page_number)
 
     query_params = request.GET.copy()
+    if "genre" in query_params:
+        query_params.pop("genre")
     if "page" in query_params:
         query_params.pop("page")
     query_string = query_params.urlencode()
 
     context = {
         "games": games,
-        "genres": Genre.objects.all(),
         "platforms": Platform.objects.all(),
         "publishers": Publisher.objects.all(),
         "tags": Tag.objects.all(),
         "q": q,
-        "genre": genre,
         "platform": platform,
         "publisher": publisher,
         "tag": tag,

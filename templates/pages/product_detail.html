@@ -20,80 +20,171 @@
 
 <div class="single-product section">
   <div class="container">
-    <div class="row">
-      <div class="col-lg-8">
-        <h4>{{ game.title }}</h4>
-        {% if game.cover %}
-          <img src="{{ game.cover.url }}" alt="{{ game.title }}" class="product-image">
-        {% endif %}
+    <div class="game-showcase">
+      <div class="game-showcase__media">
+        <div class="game-showcase__main-frame">
+          {% if game.primary_image_url %}
+            <img
+              id="game-main-media"
+              src="{{ game.primary_image_url }}"
+              alt="{{ game.primary_image_alt }}"
+              class="game-showcase__main-image"
+            >
+            <button type="button" class="game-main-nav game-main-nav--prev" data-main-prev aria-label="Previous image">
+              &#10094;
+            </button>
+            <button type="button" class="game-main-nav game-main-nav--next" data-main-next aria-label="Next image">
+              &#10095;
+            </button>
+          {% else %}
+            <div class="game-showcase__empty-media">No image</div>
+          {% endif %}
+        </div>
+
+        <div class="game-showcase__thumbs-wrap">
+          <button type="button" class="game-strip-nav game-strip-nav--prev" data-strip-prev aria-label="Scroll thumbnails left">
+            &#10094;
+          </button>
+          <div class="game-showcase__thumbs" data-thumbs-strip>
+            {% for screenshot in game.screenshots.all %}
+              <button
+                type="button"
+                class="game-thumb-btn {% if forloop.first %}is-active{% endif %}"
+                data-game-media-src="{{ screenshot.image.url }}"
+                data-game-media-alt="{{ screenshot.alt_text|default:game.title }}"
+                aria-label="Show screenshot {{ forloop.counter }}"
+              >
+                <img src="{{ screenshot.image.url }}" alt="{{ screenshot.alt_text|default:game.title }}">
+              </button>
+            {% empty %}
+              {% if game.cover %}
+                <button
+                  type="button"
+                  class="game-thumb-btn is-active"
+                  data-game-media-src="{{ game.cover.url }}"
+                  data-game-media-alt="{{ game.title }}"
+                  aria-label="Show cover"
+                >
+                  <img src="{{ game.cover.url }}" alt="{{ game.title }}">
+                </button>
+              {% else %}
+                <div class="game-thumb-btn game-thumb-btn--empty">No image</div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <button type="button" class="game-strip-nav game-strip-nav--next" data-strip-next aria-label="Scroll thumbnails right">
+            &#10095;
+          </button>
+        </div>
+      </div>
+
+      <aside class="game-showcase__info">
+        <h4 class="game-showcase__title">{{ game.title }}</h4>
+
         {% if game.discount_percent > 0 %}
-          <div class="mb-2">
+          <div class="mb-3">
             <span class="old-price">${{ game.price }}</span>
             <span class="new-price">${{ game.discounted_price }}</span>
             <span class="discount-badge">-{{ game.discount_percent }}%</span>
           </div>
         {% else %}
-          <span class="price">${{ game.price }}</span>
+          {% if game.price %}
+            <span class="price">${{ game.price }}</span>
+          {% else %}
+            <span class="price">Free</span>
+          {% endif %}
         {% endif %}
-        <p class="mt-3">{{ game.description }}</p>
-        <ul>
-          <li><span>Publisher:</span> {{ game.publisher.name|default:"No Publisher" }}</li>
-          <li>
-            <span>Genres:</span>
-            {% for item in game.genres.all %}
-              {{ item.name }}{% if not forloop.last %}, {% endif %}
-            {% empty %}
-              -
-            {% endfor %}
-          </li>
-          <li>
+
+        <p class="game-showcase__description">{{ game.description|truncatechars:180 }}</p>
+
+        <div class="game-showcase__meta-grid">
+          <div class="game-showcase__meta-item"><span>Publisher:</span> {{ game.publisher.name|default:"No Publisher" }}</div>
+          <div class="game-showcase__meta-item"><span>Developer:</span> {{ game.developer.name|default:"Unknown Developer" }}</div>
+          <div class="game-showcase__meta-item"><span>Release:</span> {{ game.release_year }}</div>
+          <div class="game-showcase__meta-item"><span>Rating:</span> {{ avg_rating|floatformat:1 }}</div>
+          <div class="game-showcase__meta-item"><span>Reviews:</span> {{ reviews_count }}</div>
+          <div class="game-showcase__meta-item">
             <span>Platforms:</span>
             {% for item in game.platforms.all %}
               {{ item.name }}{% if not forloop.last %}, {% endif %}
             {% empty %}
               -
             {% endfor %}
-          </li>
-          <li>
-            <span>Tags:</span>
-            {% for item in game.tags.all %}
-              {{ item.name }}{% if not forloop.last %}, {% endif %}
-            {% empty %}
-              -
-            {% endfor %}
-          </li>
-          <li><span>Average rating:</span> {{ avg_rating|floatformat:1 }}</li>
-          <li><span>Reviews:</span> {{ reviews_count }}</li>
-        </ul>
+          </div>
+        </div>
+
+        <div class="game-showcase__tags">
+          {% for item in game.tags.all %}
+            <span class="game-tag">{{ item.name }}</span>
+          {% empty %}
+            <span class="game-tag">No tags</span>
+          {% endfor %}
+        </div>
 
         {% if user.is_authenticated %}
-          <div class="mt-3">
+          <div class="game-showcase__actions">
             <a href="{% url 'cart_add' game.slug %}" class="btn btn-warning">Add to cart</a>
-          </div>
 
-          <form
-            method="post"
-            action="{% url 'toggle_favorite' slug=game.slug %}"
-            class="mt-3"
-            data-favorite-form
-          >
-            {% csrf_token %}
-            <button
-              type="submit"
-              class="btn btn-primary"
-              data-favorite-toggle
-              data-url="{% url 'toggle_favorite' slug=game.slug %}"
-              data-added-text="Remove from favorites"
-              data-removed-text="Add to favorites"
-            >
-              {% if is_favorite %}Remove from favorites{% else %}Add to favorites{% endif %}
-            </button>
-          </form>
+            <form method="post" action="{% url 'toggle_favorite' slug=game.slug %}" data-favorite-form>
+              {% csrf_token %}
+              <button
+                type="submit"
+                class="btn btn-primary"
+                data-favorite-toggle
+                data-url="{% url 'toggle_favorite' slug=game.slug %}"
+                data-added-text="Remove from favorites"
+                data-removed-text="Add to favorites"
+              >
+                {% if is_favorite %}Remove from favorites{% else %}Add to favorites{% endif %}
+              </button>
+            </form>
+          </div>
         {% else %}
           <p class="mt-3">
             <a href="{% url 'login' %}?next={{ request.path|urlencode }}">Log in</a>, to add this game to favorites.
           </p>
         {% endif %}
+      </aside>
+    </div>
+  </div>
+</div>
+
+<div class="section game-description-section">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="game-description-card">
+          <h4 class="mb-3">Detailed Description</h4>
+          <p class="mb-0">
+            {{ game.detailed_description|default:game.description|linebreaksbr }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section game-description-section">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="game-description-card">
+          <h4 class="mb-3">System Requirements</h4>
+          {% if system_requirement %}
+            <div class="game-showcase__meta-grid mb-0">
+              <div class="game-showcase__meta-item">
+                <span>Minimum:</span><br>
+                {{ system_requirement.minimum|linebreaksbr }}
+              </div>
+              <div class="game-showcase__meta-item">
+                <span>Recommended:</span><br>
+                {{ system_requirement.recommended|linebreaksbr }}
+              </div>
+            </div>
+          {% else %}
+            <p class="mb-0">System requirements are not specified yet.</p>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
@@ -146,4 +237,77 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    var mainMedia = document.getElementById("game-main-media");
+    var buttons = Array.prototype.slice.call(
+      document.querySelectorAll(".game-thumb-btn[data-game-media-src]")
+    );
+    var mainPrev = document.querySelector("[data-main-prev]");
+    var mainNext = document.querySelector("[data-main-next]");
+    var strip = document.querySelector("[data-thumbs-strip]");
+    var stripPrev = document.querySelector("[data-strip-prev]");
+    var stripNext = document.querySelector("[data-strip-next]");
+
+    if (!mainMedia || !buttons.length) return;
+
+    var currentIndex = Math.max(
+      0,
+      buttons.findIndex(function (item) {
+        return item.classList.contains("is-active");
+      })
+    );
+
+    function setActive(index) {
+      if (index < 0 || index >= buttons.length) return;
+
+      currentIndex = index;
+      var activeButton = buttons[currentIndex];
+
+      buttons.forEach(function (item) {
+        item.classList.remove("is-active");
+      });
+
+      activeButton.classList.add("is-active");
+      mainMedia.src = activeButton.getAttribute("data-game-media-src");
+      mainMedia.alt = activeButton.getAttribute("data-game-media-alt") || "";
+      activeButton.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+
+    buttons.forEach(function (button, index) {
+      button.addEventListener("click", function () {
+        setActive(index);
+      });
+    });
+
+    if (mainPrev) {
+      mainPrev.addEventListener("click", function () {
+        var nextIndex = currentIndex - 1 < 0 ? buttons.length - 1 : currentIndex - 1;
+        setActive(nextIndex);
+      });
+    }
+
+    if (mainNext) {
+      mainNext.addEventListener("click", function () {
+        var nextIndex = currentIndex + 1 >= buttons.length ? 0 : currentIndex + 1;
+        setActive(nextIndex);
+      });
+    }
+
+    if (strip && stripPrev) {
+      stripPrev.addEventListener("click", function () {
+        strip.scrollBy({ left: -260, behavior: "smooth" });
+      });
+    }
+
+    if (strip && stripNext) {
+      stripNext.addEventListener("click", function () {
+        strip.scrollBy({ left: 260, behavior: "smooth" });
+      });
+    }
+  })();
+</script>
 {% endblock %}

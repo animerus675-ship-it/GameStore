@@ -42,6 +42,7 @@
               <li><a href="{% url 'contact' %}" class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact Us</a></li>
               <li><a href="{% url 'faq' %}" class="{% if request.resolver_match.url_name == 'faq' %}active{% endif %}">FAQ</a></li>
               <li><a href="{% url 'cart_detail' %}" class="{% if request.resolver_match.url_name == 'cart_detail' %}active{% endif %}">Cart</a></li>
+              
               {% if user.is_authenticated %}
                 {% if user.is_superuser or perms.orders.change_order %}
                   <li><a href="{% url 'manage_orders' %}" class="{% if request.resolver_match.url_name == 'manage_orders' %}active{% endif %}">Manage Orders</a></li>
@@ -91,6 +92,7 @@
   <script src="{% static 'theme/assets/js/counter.js' %}"></script>
   <script src="{% static 'theme/assets/js/custom.js' %}"></script>
   <script src="{% static 'js/favorite.js' %}"></script>
+  
   {% block extra_js %}{% endblock %}
 </body>
 </html>
