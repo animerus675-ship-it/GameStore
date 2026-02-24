@@ -1,0 +1,43 @@
+﻿{% load account_extras %}
+<header class="header-area header-sticky">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <nav class="main-nav">
+          <a href="{% url 'pages:home' %}" class="logo">
+            <h1 style="margin: 0; color: #fff; font-weight: 800; font-size: 30px; line-height: 1;">BBGame</h1>
+          </a>
+          <ul class="nav" data-mobile-menu data-nav>
+            <li><a href="{% url 'pages:home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a></li>
+            <li><a href="{% url 'pages:shop' %}" class="{% if request.resolver_match.url_name == 'shop' %}active{% endif %}">Our Shop</a></li>
+            <li><a href="{% url 'pages:contact' %}" class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact Us</a></li>
+            <li><a href="{% url 'pages:faq' %}" class="{% if request.resolver_match.url_name == 'faq' %}active{% endif %}">FAQ</a></li>
+            <li><a href="{% url 'pages:cart_detail' %}" class="{% if request.resolver_match.url_name == 'cart_detail' %}active{% endif %}">Cart</a></li>
+            <li class="theme-nav-item">
+              <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Toggle theme" title="Toggle theme">
+                &#9790;
+              </button>
+            </li>
+
+            {% if user.is_authenticated %}
+              {% if user.is_superuser or perms.orders.change_order %}
+                <li><a href="{% url 'pages:manage_orders' %}" class="{% if request.resolver_match.url_name == 'manage_orders' %}active{% endif %}">Manage Orders</a></li>
+              {% endif %}
+              <li class="profile-nav-item">
+                <a href="{% url 'pages:profile' %}" class="profile-nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" title="Profile">
+                  <img src="{{ user|avatar_url }}" alt="" class="profile-avatar">
+                </a>
+              </li>
+            {% else %}
+              <li><a href="{% url 'pages:login' %}" class="{% if request.resolver_match.url_name == 'login' %}active{% endif %}">Login</a></li>
+              <li><a href="{% url 'pages:register' %}" class="{% if request.resolver_match.url_name == 'register' %}active{% endif %}">Register</a></li>
+            {% endif %}
+          </ul>
+          <a class="menu-trigger" data-burger>
+            <span>Menu</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+  </div>
+</header>

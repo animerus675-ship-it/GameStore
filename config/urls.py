@@ -25,8 +25,8 @@ from django.views.defaults import page_not_found, server_error
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("pages.urls")),
-    path("api/", include("api_app.urls")),
+    path("", include(("pages.urls", "pages"), namespace="pages")),
+    path("api/", include(("api_app.urls", "api_app"), namespace="api_app")),
 ]
 
 if settings.DEBUG:

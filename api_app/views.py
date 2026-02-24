@@ -4,7 +4,6 @@ from decimal import Decimal
 from django.core.paginator import Paginator
 from django.db.models import Avg, Count, OuterRef, Subquery
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_http_methods
 
 from catalog.models import Game
@@ -41,6 +40,14 @@ def _serialize_price(value):
     if isinstance(value, Decimal):
         return float(value)
     return value
+
+
+def _get_game_or_404_json(slug, queryset=None):
+    target_qs = queryset if queryset is not None else Game.objects.all()
+    try:
+        return target_qs.get(slug=slug), None
+    except Game.DoesNotExist:
+        return None, _json_error("game_not_found", status=404)
 
 
 def _annotated_games_queryset():
@@ -147,10 +154,12 @@ def games_list(request):
 
 @require_http_methods(["GET", "PUT", "DELETE"])
 def game_detail(request, slug):
-    game = get_object_or_404(
+    game, error_response = _get_game_or_404_json(
+        slug,
         Game.objects.select_related("publisher").prefetch_related("genres", "platforms"),
-        slug=slug,
     )
+    if error_response:
+        return error_response
 
     if request.method == "PUT":
         if not _is_manager(request.user):
@@ -218,7 +227,9 @@ def favorite_toggle(request, slug):
     if not request.user.is_authenticated:
         return _json_error("auth_required", status=401)
 
-    game = get_object_or_404(Game, slug=slug)
+    game, error_response = _get_game_or_404_json(slug)
+    if error_response:
+        return error_response
     favorite = Favorite.objects.filter(user=request.user, game=game).first()
     if favorite:
         favorite.delete()
@@ -235,7 +246,9 @@ def review_upsert(request, slug):
     if not request.user.is_authenticated:
         return _json_error("auth_required", status=401)
 
-    game = get_object_or_404(Game, slug=slug)
+    game, error_response = _get_game_or_404_json(slug)
+    if error_response:
+        return error_response
 
     payload, error = _parse_json_body(request)
     if error:
@@ -278,7 +291,9 @@ def review_delete(request, slug):
     if not request.user.is_authenticated:
         return _json_error("auth_required", status=401)
 
-    game = get_object_or_404(Game, slug=slug)
+    game, error_response = _get_game_or_404_json(slug)
+    if error_response:
+        return error_response
     Review.objects.filter(user=request.user, game=game).delete()
     return _json_ok({"deleted": True})
 

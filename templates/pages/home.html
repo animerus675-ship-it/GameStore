@@ -1,4 +1,4 @@
-{% extends "layout/base.html" %}
+﻿{% extends "layout/base.html" %}
 {% load static %}
 
 {% block title %}BBGame - Home{% endblock %}
@@ -34,42 +34,42 @@ Here you will find the most up-to-date prices and accurate descriptions.</p>
   <div class="container">
     <div class="row">
       <div class="col-lg-3 col-md-6">
-        <a href="#">
+        <a href="{% url 'pages:shop' %}">
           <div class="item">
             <div class="image">
-              <img src="{% static 'theme/assets/images/featured-01.png' %}" alt="" style="max-width: 44px;">
+              <img src="{% static 'theme/assets/images/pngtree-sale-icon-isolated-on-abstract-background-png-image_1765910.jpg' %}" alt="Hot Deals" style="max-width: 44px;">
             </div>
-            <h4>Free Storage</h4>
+            <h4>Hot Deals</h4>
           </div>
         </a>
       </div>
       <div class="col-lg-3 col-md-6">
-        <a href="#">
+        <a href="{% url 'pages:shop' %}?rating=4.5">
           <div class="item">
             <div class="image">
-              <img src="{% static 'theme/assets/images/featured-02.png' %}" alt="" style="max-width: 44px;">
+              <img src="{% static 'theme/assets/images/1710220.png' %}" alt="Top Rated" style="max-width: 44px;">
             </div>
-            <h4>User More</h4>
+            <h4>Top Rated</h4>
           </div>
         </a>
       </div>
       <div class="col-lg-3 col-md-6">
-        <a href="#">
+        <a href="{% url 'pages:shop' %}?sort=newest">
           <div class="item">
             <div class="image">
-              <img src="{% static 'theme/assets/images/featured-03.png' %}" alt="" style="max-width: 44px;">
+              <img src="{% static 'theme/assets/images/2618540.png' %}" alt="New Releases" style="max-width: 44px;">
             </div>
-            <h4>Reply Ready</h4>
+            <h4>New Releases</h4>
           </div>
         </a>
       </div>
       <div class="col-lg-3 col-md-6">
-        <a href="#">
+        <a href="{% url 'pages:faq' %}">
           <div class="item">
             <div class="image">
-              <img src="{% static 'theme/assets/images/featured-04.png' %}" alt="" style="max-width: 44px;">
+              <img src="{% static 'theme/assets/images/6716131.png' %}" alt="FAQ / Support" style="max-width: 44px;">
             </div>
-            <h4>Easy Layout</h4>
+            <h4>FAQ / Support</h4>
           </div>
         </a>
       </div>
@@ -88,18 +88,18 @@ Here you will find the most up-to-date prices and accurate descriptions.</p>
       </div>
       <div class="col-lg-6">
         <div class="main-button">
-          <a href="{% url 'news_list' %}">View All News</a>
+          <a href="{% url 'pages:news_list' %}">View All News</a>
         </div>
       </div>
       {% for news in news_list %}
         <div class="col-lg-3 col-md-6">
-          <div class="item h-100">
+          <div class="item h-100 news-card">
             <div class="thumb">
-              <a href="{% url 'news_detail' news.slug %}">
+              <a href="{% url 'pages:news_detail' news.slug %}">
                 {% if news.image %}
                   <img src="{{ news.image.url }}" alt="{{ news.title }}">
                 {% else %}
-                  <img src="{% static 'https://res.cloudinary.com/dbayl3vmz/image/upload/v1771911956/9xBT864XC3j5wcZRPgQapa_eocpkd.png' %}" alt="{{ news.title }}">
+                  <img src="https://res.cloudinary.com/dbayl3vmz/image/upload/v1771911956/9xBT864XC3j5wcZRPgQapa_eocpkd.png" alt="{{ news.title }}">
                 {% endif %}
               </a>
             </div>
@@ -132,7 +132,7 @@ Here you will find the most up-to-date prices and accurate descriptions.</p>
               </div>
               <p>Lorem ipsum dolor consectetur adipiscing, sed do eiusmod tempor incididunt.</p>
               <div class="main-button">
-                <a href="{% url 'shop' %}">Shop Now</a>
+                <a href="{% url 'pages:shop' %}">Shop Now</a>
               </div>
             </div>
           </div>

@@ -1,4 +1,4 @@
-{% extends "layout/base.html" %}
+﻿{% extends "layout/base.html" %}
 {% load static %}
 
 {% block title %}{{ news.title }}{% endblock %}
@@ -9,7 +9,7 @@
     <div class="row">
       <div class="col-lg-12">
         <h3>{{ news.title }}</h3>
-        <span class="breadcrumb"><a href="{% url 'home' %}">Home</a> &gt; <a href="{% url 'news_list' %}">Latest News</a> &gt; {{ news.title }}</span>
+        <span class="breadcrumb"><a href="{% url 'pages:home' %}">Home</a> &gt; <a href="{% url 'pages:news_list' %}">Latest News</a> &gt; {{ news.title }}</span>
       </div>
     </div>
   </div>

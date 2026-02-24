@@ -1,4 +1,4 @@
-{% extends "layout/base.html" %}
+﻿{% extends "layout/base.html" %}
 
 {% block title %}Checkout{% endblock %}
 
@@ -33,7 +33,7 @@
       </form>
     {% else %}
       <p>Your cart has no items to checkout.</p>
-      <a href="{% url 'shop' %}" class="btn btn-secondary">Back to shop</a>
+      <a href="{% url 'pages:shop' %}" class="btn btn-secondary">Back to shop</a>
     {% endif %}
   </div>
 </div>

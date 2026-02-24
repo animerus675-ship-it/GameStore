@@ -1,4 +1,5 @@
 ﻿from decimal import Decimal
+from pathlib import Path
 
 from django.contrib import messages
 from django.contrib.auth import login, logout
@@ -22,6 +23,10 @@ from favorites.models import Favorite
 from orders.models import Order, OrderItem, Payment
 from reviews.models import Review
 from .forms import RegisterForm
+
+ALLOWED_AVATAR_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp"}
+ALLOWED_AVATAR_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
+MAX_AVATAR_SIZE_BYTES = 3 * 1024 * 1024
 
 
 def home(request):
@@ -58,7 +63,7 @@ def register(request):
             user.groups.add(client_group)
             login(request, user)
             messages.success(request, "Registration completed successfully.")
-            return redirect("home")
+            return redirect("pages:home")
     else:
         form = _prepare_register_form(RegisterForm())
 
@@ -67,14 +72,14 @@ def register(request):
 
 def user_login(request):
     if request.user.is_authenticated:
-        return redirect("home")
+        return redirect("pages:home")
 
     next_url = request.GET.get("next") or request.POST.get("next") or ""
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
-            return redirect(next_url or "home")
+            return redirect(next_url or "pages:home")
         messages.error(request, "Invalid username or password.")
     else:
         form = AuthenticationForm(request)
@@ -84,7 +89,7 @@ def user_login(request):
 
 def user_logout(request):
     logout(request)
-    return redirect("home")
+    return redirect("pages:home")
 
 
 def shop(request):
@@ -98,11 +103,27 @@ def profile_view(request):
         defaults={"display_name": request.user.username},
     )
 
-    if request.method == "POST" and request.FILES.get("avatar"):
-        profile.avatar = request.FILES["avatar"]
+    if request.method == "POST":
+        avatar = request.FILES.get("avatar")
+        if not avatar:
+            messages.error(request, "Please select an image file.")
+            return redirect("pages:profile")
+
+        extension = Path(avatar.name).suffix.lower()
+        content_type = (avatar.content_type or "").lower()
+
+        if avatar.size > MAX_AVATAR_SIZE_BYTES:
+            messages.error(request, "File is too large. Maximum size is 3 MB.")
+            return redirect("pages:profile")
+
+        if content_type not in ALLOWED_AVATAR_CONTENT_TYPES or extension not in ALLOWED_AVATAR_EXTENSIONS:
+            messages.error(request, "Only JPG, PNG, and WEBP files are allowed.")
+            return redirect("pages:profile")
+
+        profile.avatar = avatar
         profile.save(update_fields=["avatar"])
         messages.success(request, "Avatar updated.")
-        return redirect("profile")
+        return redirect("pages:profile")
 
     favorites_count = Favorite.objects.filter(user=request.user).count()
     cart_count = CartItem.objects.filter(cart__user=request.user).count()
@@ -173,7 +194,7 @@ def toggle_favorite(request, slug):
     if not request.user.is_authenticated:
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"error": "auth_required"}, status=401)
-        return redirect(f"{reverse('login')}?next={request.path}")
+        return redirect(f"{reverse('pages:login')}?next={request.path}")
 
     game = get_object_or_404(Game, slug=slug)
     favorite = Favorite.objects.filter(user=request.user, game=game).first()
@@ -186,7 +207,7 @@ def toggle_favorite(request, slug):
 
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({"status": status})
-    return redirect("product_detail", slug=game.slug)
+    return redirect("pages:product_detail", slug=game.slug)
 
 
 @login_required
@@ -200,10 +221,10 @@ def upsert_review(request, slug):
     try:
         rating = int(rating_raw)
     except (TypeError, ValueError):
-        return redirect("product_detail", slug=game.slug)
+        return redirect("pages:product_detail", slug=game.slug)
 
     if rating < 1 or rating > 5:
-        return redirect("product_detail", slug=game.slug)
+        return redirect("pages:product_detail", slug=game.slug)
 
     review, created = Review.objects.get_or_create(
         user=request.user,
@@ -215,7 +236,7 @@ def upsert_review(request, slug):
         review.text = text
         review.save(update_fields=["rating", "text"])
 
-    return redirect("product_detail", slug=game.slug)
+    return redirect("pages:product_detail", slug=game.slug)
 
 
 @login_required
@@ -253,7 +274,7 @@ def cart_add(request, slug):
     referer = request.META.get("HTTP_REFERER")
     if referer:
         return redirect(referer)
-    return redirect("cart_detail")
+    return redirect("pages:cart_detail")
 
 
 @login_required
@@ -263,20 +284,20 @@ def cart_update(request, slug):
     cart, _ = Cart.objects.get_or_create(user=request.user)
     item = CartItem.objects.filter(cart=cart, game=game).first()
     if not item:
-        return redirect("cart_detail")
+        return redirect("pages:cart_detail")
 
     quantity_raw = request.POST.get("quantity", "").strip()
     try:
         quantity = int(quantity_raw)
     except (TypeError, ValueError):
-        return redirect("cart_detail")
+        return redirect("pages:cart_detail")
 
     if quantity <= 0:
         item.delete()
     else:
         item.quantity = quantity
         item.save(update_fields=["quantity"])
-    return redirect("cart_detail")
+    return redirect("pages:cart_detail")
 
 
 @login_required
@@ -284,7 +305,7 @@ def cart_remove(request, slug):
     game = get_object_or_404(Game, slug=slug)
     cart, _ = Cart.objects.get_or_create(user=request.user)
     CartItem.objects.filter(cart=cart, game=game).delete()
-    return redirect("cart_detail")
+    return redirect("pages:cart_detail")
 
 
 @login_required
@@ -314,7 +335,7 @@ def checkout(request):
         OrderItem.objects.bulk_create(order_items)
         Payment.objects.create(order=order, provider="demo", status=Payment.PaymentStatus.PENDING)
         CartItem.objects.filter(cart=cart).delete()
-        return redirect("order_detail", order_id=order.id)
+        return redirect("pages:order_detail", order_id=order.id)
 
     return render(
         request,
@@ -393,7 +414,7 @@ def manage_order_status(request, order_id):
     else:
         messages.error(request, "Invalid status.")
 
-    return redirect("manage_orders")
+    return redirect("pages:manage_orders")
 
 
 def contact(request):

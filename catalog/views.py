@@ -12,6 +12,7 @@ def shop(request):
     platform = request.GET.get("platform", "").strip()
     publisher = request.GET.get("publisher", "").strip()
     tag = request.GET.get("tag", "").strip()
+    rating = request.GET.get("rating", "").strip()
     sort = request.GET.get("sort", "").strip()
 
     games_qs = (
@@ -33,6 +34,13 @@ def shop(request):
         games_qs = games_qs.filter(publisher__slug=publisher)
     if tag:
         games_qs = games_qs.filter(tags__slug=tag)
+    if rating:
+        try:
+            rating_value = float(rating)
+        except ValueError:
+            rating_value = None
+        if rating_value is not None and 0 <= rating_value <= 5:
+            games_qs = games_qs.filter(average_rating__gte=rating_value)
 
     if sort == "price_asc":
         games_qs = games_qs.order_by("price")
@@ -65,6 +73,7 @@ def shop(request):
         "platform": platform,
         "publisher": publisher,
         "tag": tag,
+        "rating": rating,
         "sort": sort,
         "query_string": query_string,
     }

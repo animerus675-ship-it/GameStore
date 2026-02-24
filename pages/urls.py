@@ -4,6 +4,8 @@ from django.urls import reverse_lazy
 
 from . import views
 
+app_name = "pages"
+
 urlpatterns = [
     path("", views.home, name="home"),
     path("news/", views.news_list, name="news_list"),
@@ -18,7 +20,7 @@ urlpatterns = [
             template_name="pages/password_reset_form.html",
             email_template_name="pages/password_reset_email.html",
             subject_template_name="pages/password_reset_subject.txt",
-            success_url=reverse_lazy("password_reset_done"),
+            success_url=reverse_lazy("pages:password_reset_done"),
         ),
         name="password_reset",
     ),
@@ -33,7 +35,7 @@ urlpatterns = [
         "reset/<uidb64>/<token>/",
         auth_views.PasswordResetConfirmView.as_view(
             template_name="pages/password_reset_confirm.html",
-            success_url=reverse_lazy("password_reset_complete"),
+            success_url=reverse_lazy("pages:password_reset_complete"),
         ),
         name="password_reset_confirm",
     ),
@@ -48,7 +50,7 @@ urlpatterns = [
         "password-change/",
         auth_views.PasswordChangeView.as_view(
             template_name="pages/password_change_form.html",
-            success_url=reverse_lazy("password_change_done"),
+            success_url=reverse_lazy("pages:password_change_done"),
         ),
         name="password_change",
     ),
@@ -70,7 +72,6 @@ urlpatterns = [
     path("favorites/", views.favorites_list, name="favorites_list"),
     path("manage/orders/", views.manage_orders, name="manage_orders"),
     path("manage/orders/<int:order_id>/status/", views.manage_order_status, name="manage_order_status"),
-    path("favorite/<slug:slug>/", views.toggle_favorite, name="favorite_toggle"),
     path("product/<slug:slug>/favorite/", views.toggle_favorite, name="toggle_favorite"),
     path("product/<slug:slug>/review/", views.upsert_review, name="upsert_review"),
     path("product/<slug:slug>/", views.product_detail, name="product_detail"),

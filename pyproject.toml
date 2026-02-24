@@ -1,0 +1,27 @@
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | venv
+  | migrations
+  | static
+  | media
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+skip_glob = ["*/migrations/*", "static/*", "media/*", "venv/*", ".venv/*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+exclude = [".git", ".venv", "venv", "static", "media", "**/migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+

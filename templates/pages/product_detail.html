@@ -1,4 +1,4 @@
-{% extends "layout/base.html" %}
+﻿{% extends "layout/base.html" %}
 
 {% block title %}{{ game.title }}{% endblock %}
 
@@ -9,8 +9,8 @@
       <div class="col-lg-12">
         <h3>{{ game.title }}</h3>
         <span class="breadcrumb">
-          <a href="{% url 'home' %}">Home</a> &gt;
-          <a href="{% url 'shop' %}">Shop</a> &gt;
+          <a href="{% url 'pages:home' %}">Home</a> &gt;
+          <a href="{% url 'pages:shop' %}">Shop</a> &gt;
           {{ game.title }}
         </span>
       </div>
@@ -123,15 +123,15 @@
 
         {% if user.is_authenticated %}
           <div class="game-showcase__actions">
-            <a href="{% url 'cart_add' game.slug %}" class="btn btn-warning">Add to cart</a>
+            <a href="{% url 'pages:cart_add' game.slug %}" class="btn btn-warning">Add to cart</a>
 
-            <form method="post" action="{% url 'toggle_favorite' slug=game.slug %}" data-favorite-form>
+            <form method="post" action="{% url 'pages:toggle_favorite' slug=game.slug %}" data-favorite-form>
               {% csrf_token %}
               <button
                 type="submit"
                 class="btn btn-primary"
                 data-favorite-toggle
-                data-url="{% url 'toggle_favorite' slug=game.slug %}"
+                data-url="{% url 'pages:toggle_favorite' slug=game.slug %}"
                 data-added-text="Remove from favorites"
                 data-removed-text="Add to favorites"
               >
@@ -141,7 +141,7 @@
           </div>
         {% else %}
           <p class="mt-3">
-            <a href="{% url 'login' %}?next={{ request.path|urlencode }}">Log in</a>, to add this game to favorites.
+            <a href="{% url 'pages:login' %}?next={{ request.path|urlencode }}">Log in</a>, to add this game to favorites.
           </p>
         {% endif %}
       </aside>
@@ -197,7 +197,7 @@
         <h4 class="mb-3">Reviews</h4>
 
         {% if user.is_authenticated %}
-          <form method="post" action="{% url 'upsert_review' slug=game.slug %}" class="mb-4">
+          <form method="post" action="{% url 'pages:upsert_review' slug=game.slug %}" class="mb-4">
             {% csrf_token %}
             <div class="row g-2">
               <div class="col-md-2">
@@ -211,7 +211,16 @@
                 </select>
               </div>
               <div class="col-md-8">
-                <textarea name="text" class="form-control" rows="2" placeholder="Your review...">{% if user_review %}{{ user_review.text }}{% endif %}</textarea>
+                <textarea
+                  name="text"
+                  class="form-control"
+                  rows="2"
+                  maxlength="1000"
+                  placeholder="Your review..."
+                  data-counter-text
+                  data-counter-output="#review-counter"
+                >{% if user_review %}{{ user_review.text }}{% endif %}</textarea>
+                <small id="review-counter" data-counter-output class="text-muted d-block mt-1">0/1000</small>
               </div>
               <div class="col-md-2 d-grid">
                 <button type="submit" class="btn btn-success">Save</button>
@@ -219,7 +228,7 @@
             </div>
           </form>
         {% else %}
-          <p><a href="{% url 'login' %}?next={{ request.path|urlencode }}">Log in</a>, to leave a review.</p>
+          <p><a href="{% url 'pages:login' %}?next={{ request.path|urlencode }}">Log in</a>, to leave a review.</p>
         {% endif %}
 
         <div class="list-group">
